@@ -5,47 +5,29 @@
 #include "include/RHFWrapper.h"
 
 RHFWrapper::RHFWrapper(hf::rhf::RHF &rhf_basis):rhf_basis(rhf_basis) {
+    SO_V = libwrp::transform_AO_to_SO(rhf_basis.basis.V,rhf_basis.C_canonical);
+    SO_T = libwrp::transform_AO_to_SO(rhf_basis.basis.T,rhf_basis.C_canonical);
+    SO_tei = libwrp::transform_AO_to_SO(rhf_basis.basis.tei,rhf_basis.C_canonical);
+
+
 
 
 }
 
-double RHFWrapper::calculateOverlap(int site1, int site2) {
-    double kin = 0;
-    double nuc = 0;
-    for (int i = 0; i<rhf_basis.C_canonical.innerSize(); i++) {
-        for (int j = 0; j<rhf_basis.C_canonical.innerSize(); j++) {
-            kin += rhf_basis.C_canonical.col(site1)[i]*rhf_basis.C_canonical.col(site2)[j]*rhf_basis.basis.T(i,j);
-            nuc += rhf_basis.C_canonical.col(site1)[i]*rhf_basis.C_canonical.col(site2)[j]*rhf_basis.basis.V(i,j);
-
-
-        }
-
-    }
+double RHFWrapper::calculateOverlap(unsigned long site1, unsigned long site2) {
+    double kin = SO_T(site1,site2);
+    double nuc = SO_V(site1,site2);
     return kin+nuc;
 }
 
-double RHFWrapper::calculateOverlap(int site1, int site2, int site3, int site4) {
-    double rep = 0;
-    Eigen::VectorXd so1 = rhf_basis.C_canonical.col(site1);
-    Eigen::VectorXd so2 = rhf_basis.C_canonical.col(site2);
-    Eigen::VectorXd so3 = rhf_basis.C_canonical.col(site3);
-    Eigen::VectorXd so4 = rhf_basis.C_canonical.col(site4);
-    for (int i = 0; i<so1.innerSize(); i++) {
-        for (int j = 0; j<so1.innerSize(); j++) {
-            for (int l = 0; l<so1.innerSize(); l++) {
-                for (int k = 0; k<so1.innerSize(); k++) {
-                    rep += so1[i]*so2[k]*so3[j]*so4[l]*rhf_basis.basis.tei(i,j,l,k);
+double RHFWrapper::calculateOverlap(unsigned long site1, unsigned long site2, unsigned long site3, unsigned long site4) {
+    return SO_tei(site1,site2,site3,site4);
+}
 
+unsigned long RHFWrapper::getN_bf() {
+    return rhf_basis.basis.nbf();
+};
 
-
-                }
-            }
-
-
-
-
-        }
-
-    }
-    return rep;
+unsigned long RHFWrapper::getN_electrons() {
+    return rhf_basis.basis.molecule.nelec;
 }

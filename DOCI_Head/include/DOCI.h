@@ -22,12 +22,12 @@ struct State {
 
 class DOCI {
 public:
-    DOCI(unsigned int sites, unsigned int electrons, StaticWrapper& calculator);
+    DOCI(StaticWrapper& calculator);
     Eigen::MatrixXd getHam();
     void print();
 private:
-    unsigned int sites;
-    unsigned int electrons;
+    unsigned long sites;
+    unsigned long electrons;
     unsigned long nbf;
     Eigen::MatrixXd hamiltonian;
     AddressingMatrix ad_mat;

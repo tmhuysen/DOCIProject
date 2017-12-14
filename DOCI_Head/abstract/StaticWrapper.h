@@ -8,8 +8,10 @@
 
 class StaticWrapper {
 public:
-    virtual double calculateOverlap(int site1, int site2)=0;
-    virtual double calculateOverlap(int site1, int site2, int site3, int site4)=0;
+    virtual double calculateOverlap(unsigned long site1, unsigned long site2)=0;
+    virtual double calculateOverlap(unsigned long site1, unsigned long site2, unsigned long site3, unsigned long site4)=0;
+    virtual unsigned long getN_bf()=0;
+    virtual unsigned long getN_electrons()=0;
 
 
 };

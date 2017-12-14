@@ -20,7 +20,7 @@ bool compareMat(Eigen::MatrixXd &mat1, Eigen::MatrixXd &mat2){
     }else{
         for(int i = 0; i<mat1.innerSize(); i++){
             for(int j = 0; j<mat1.innerSize(); j++){
-                if(mat1(i,j)-mat2(i,j)>0.0001){
+                if(abs(mat1(i,j)-mat2(i,j))>0.0001){
                     return false;
                 }
             }

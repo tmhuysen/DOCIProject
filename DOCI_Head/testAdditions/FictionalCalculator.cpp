@@ -4,9 +4,10 @@
 
 #include "FictionalCalculator.h"
 
-double FictionalCalculator::calculateOverlap(int site1, int site2) {
+double FictionalCalculator::calculateOverlap(unsigned long site1, unsigned long site2) {
     return 1;
 }
-double FictionalCalculator::calculateOverlap(int site1, int site2, int site3, int site4) {
+double FictionalCalculator::calculateOverlap(unsigned long site1, unsigned long site2, unsigned long site3,
+                                             unsigned long site4) {
     return 2;
 }

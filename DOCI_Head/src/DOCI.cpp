@@ -5,16 +5,12 @@
 
 #include "include/DOCI.h"
 
-DOCI::DOCI(unsigned int sites, unsigned int electrons, StaticWrapper& calculator) {
+DOCI::DOCI(StaticWrapper& calculator) {
+    this->sites = calculator.getN_bf();
+    this->electrons =  calculator.getN_electrons()/2;
 
-
-
-    if (sites <= electrons){
-        std::cerr << "Invalid argument: to many electrons";
-    }else{
-        this->sites = sites;
-        this->electrons = electrons;
-
+    if (sites < electrons) {
+        throw std::cerr << "Invalid argument: to many electrons";
     }
     auto nbf_ = boost::math::binomial_coefficient<double>(sites, electrons);
     if (nbf_ > 4294967295.0) {
@@ -23,6 +19,7 @@ DOCI::DOCI(unsigned int sites, unsigned int electrons, StaticWrapper& calculator
     }
     this->nbf = static_cast<unsigned long>(nbf_);
     this->hamiltonian = Eigen::MatrixXd::Zero(this->nbf, this->nbf);
+
 
     ad_mat = AddressingMatrix(sites,electrons);
     groundstates = { State {std::numeric_limits<double>::max(),Eigen::VectorXd()} };
@@ -44,64 +41,34 @@ DOCI::DOCI(unsigned int sites, unsigned int electrons, StaticWrapper& calculator
 
 void DOCI::calculateDoci(double start, double end) {
     boost::dynamic_bitset<> basic_bit = ad_mat.generateBinaryVector(start * nbf);
-
     for (unsigned long i = 0; i < nbf * end; i++) {
-
         for (unsigned long j = 0; j < sites; j++) {
-
-
             if (basic_bit[j]){
-                addToHamiltonian(integralCalculator->calculateOverlap(j,j),i,i);
-                addToHamiltonian(integralCalculator->calculateOverlap(j,j),i,i);
-
+                double overlap = integralCalculator->calculateOverlap(j,j);
+                addToHamiltonian(2*overlap,i,i);
             }
             for(unsigned long l = j; l < sites; l++){
-
                 if(j!=l){
                     boost::dynamic_bitset<> two_target_dia = basic_bit;
                     if (annihilation(two_target_dia, j) && annihilation(two_target_dia, l)){
-                        double overlap1 = integralCalculator->calculateOverlap(j,l,j,l);
-                        double overlap2 = integralCalculator->calculateOverlap(l,j,l,j);
-                        double overlap3 = integralCalculator->calculateOverlap(j,l,l,j);
-                        double overlap4 = integralCalculator->calculateOverlap(l,j,j,l);
-                        overlap3 *= -1;
+                        //Overlap parameters are entered in chemical notation!
+                        //This means that first 2 parameters are for the first electrons and subsequent ones are for the second
+                        double overlap1 = integralCalculator->calculateOverlap(j,j,l,l);
+                        double overlap4 = integralCalculator->calculateOverlap(j,l,l,j);
                         overlap4 *= -1;
-                        addToHamiltonian(overlap1,i,i);
-                        addToHamiltonian(overlap2,i,i);
-                        addToHamiltonian(overlap3,i,i);
-                        addToHamiltonian(overlap4,i,i);
-
-                        addToHamiltonian(overlap1,i,i);
-                        addToHamiltonian(overlap2,i,i);
-                        addToHamiltonian(overlap3,i,i);
-                        addToHamiltonian(overlap4,i,i);
-
-
+                        addToHamiltonian((4*overlap1+2*overlap4),i,i);
                     }
-
-
                 }
-
                 boost::dynamic_bitset<> two_target = basic_bit;
                 if (annihilation(two_target, j) && creation(two_target, l)){
                     unsigned long address = ad_mat.fetchAddress(two_target);
+                    //Overlap parameters are entered in chemical notation!
                     double overlap = integralCalculator->calculateOverlap(j,l,j,l);
                     addToHamiltonian(overlap,i,address);
-                    addToHamiltonian(overlap,i,address);
                 }
-
-
-
-
-
             }
-
-
-
         }
-
         basic_bit = next_bitset_permutation(basic_bit);
-
     }
     symmatu(hamiltonian);
 

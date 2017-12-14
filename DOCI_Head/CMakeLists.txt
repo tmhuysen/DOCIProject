@@ -3,8 +3,6 @@ project(DOCI_Head)
 
 set(CMAKE_CXX_STANDARD 11)
 
-
-
 file(GLOB SOURCES "src/*.cpp" "include/*.h" "abstract/*.h" "testAdditions/*.h" "testAdditions/*.cpp")
 add_library(DOCI_Head ${SOURCES})
 find_package(eigen3)

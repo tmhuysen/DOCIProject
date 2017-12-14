@@ -10,9 +10,9 @@
 
 class FictionalCalculator : public StaticWrapper {
 public:
-    double calculateOverlap(int site1, int site2) override;
+    double calculateOverlap(unsigned long site1, unsigned long site2) override;
 
-    double calculateOverlap(int site1, int site2, int site3, int site4) override;
+    double calculateOverlap(unsigned long site1, unsigned long site2, unsigned long site3, unsigned long site4) override;
 };
 
 
